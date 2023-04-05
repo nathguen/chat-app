@@ -4,6 +4,7 @@ import path from "path";
 import { Server } from "socket.io";
 import Filter from "bad-words";
 import { generateLocationMessage, generateMessage } from "./utils/messages";
+import { addUser, removeUser, getUser, getUsersInRoom } from "./utils/users";
 
 const filter = new Filter();
 
@@ -19,25 +20,54 @@ app.use(express.static(publicDirectory));
 
 
 io.on('connection', (socket) => {
-  socket.emit('message', generateMessage('Admin', 'Welcome!'));
-  socket.broadcast.emit('message', generateMessage('Admin', 'A new user has joined!'));
+  socket.on('join', (data, callback) => {
+    // using "data" to ensure that it's in a consistent format after joining
+    const { error, user } = addUser({ id: socket.id, ...data });
+
+    if (error) {
+      return callback(error);
+    }
+
+    if (!user) {
+      return callback('User not found');
+    }
+
+    socket.join(user.room);
+
+    socket.emit('message', generateMessage('Admin', 'Welcome!'));
+    socket.broadcast.to(user.room).emit('message', generateMessage('Admin', `${user.username} has joined!`));
+  })
 
   socket.on('sendMessage', (message, callback) => {
-    if(filter.isProfane(message)) {
+    if (filter.isProfane(message)) {
       return callback('Profanity is not allowed!');
     }
 
-    io.emit('message', generateMessage('Admin', message));
-    callback('Acknowledged!');
+    const user = getUser(socket.id);
+    if (user) {
+      console.log('send message', user.room, user.username, message)
+      io.to(user.room).emit('message', generateMessage(user.username, message));
+    }
+
+    if (callback) {
+      callback('Acknowledged!');
+    }
   });
 
   socket.on('sendLocation', (coords, callback) => {
     io.emit('locationMessage', generateLocationMessage('Admin', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`));
-    callback();
+
+    if (callback) {
+      callback();
+    }
   });
 
   socket.on('disconnect', () => {
-    io.emit('message', generateMessage('Admin', 'A user has left!'));
+    const user = removeUser(socket.id);
+
+    if (user) {
+      io.to(user.room).emit('message', generateMessage('Admin', `${user.username} has left!`));
+    }
   });
 });
 

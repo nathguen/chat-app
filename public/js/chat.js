@@ -13,6 +13,11 @@ const locationTemplate = document.querySelector(
   "#location-message-template"
 ).innerHTML;
 
+// Options
+const { username, room } = Qs.parse(location.search, {
+  ignoreQueryPrefix: true,
+});
+
 document.querySelector("#message-form").addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -66,4 +71,11 @@ socket.on("locationMessage", (message) => {
 
 socket.on("message", (message) => {
   displayMessage(message, messageTemplate);
+});
+
+socket.emit("join", { username, room }, (error) => {
+  if (error) {
+    alert(error);
+    location.href = "/";
+  }
 });
