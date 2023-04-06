@@ -1,15 +1,12 @@
-# README
+# Chat App
 
-This is the [Express](https://expressjs.com) [Hello world](https://expressjs.com/en/starter/hello-world.html) example on [Render](https://render.com).
+This is a real-time chat application, built using [Node.js](https://nodejs.org/en), [Express.js](https://expressjs.com/), [TypeScript](https://www.typescriptlang.org/), and [Socket.io](https://socket.io/). 
 
-The app in this repo is deployed at [https://express.onrender.com](https://express.onrender.com).
+Users can join an available room and chat with each other.
 
-## Deployment
+## Demo
 
-See https://render.com/docs/deploy-node-express-app or follow the steps below:
+[Live Demo Link](https://chat.thescrappy.dev/)
 
-Create a new web service with the following values:
-  * Build Command: `yarn`
-  * Start Command: `node app.js`
+Open two tabs or windows in the browser, enter a unique username for each (e.g., Sam and Bart), and join the same room name.
 
-That's it! Your web service will be live on your Render URL as soon as the build finishes.
