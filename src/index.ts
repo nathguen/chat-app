@@ -53,7 +53,6 @@ io.on('connection', (socket) => {
 
     const user = getUser(socket.id);
     if (user) {
-      console.log('send message', user.room, user.username, message)
       io.to(user.room).emit('message', generateMessage(user.username, message));
     }
 

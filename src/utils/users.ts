@@ -50,7 +50,6 @@ export const removeUser = (id: string) => {
 }
 
 export const getUser = (id: string) => {
-  console.log({ users, id })
   return users.find((user) => user.id === id);
 }
 
