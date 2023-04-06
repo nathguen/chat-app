@@ -63,7 +63,13 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sendLocation', (coords, callback) => {
-    io.emit('locationMessage', generateLocationMessage('Admin', `https://google.com/maps?q=${coords.latitude},${coords.longitude}`));
+    const user = getUser(socket.id);
+
+    if (!user) {
+      return callback && callback('User not found');
+    }
+
+    io.emit('locationMessage', generateLocationMessage(user.username, `https://google.com/maps?q=${coords.latitude},${coords.longitude}`));
 
     if (callback) {
       callback();
