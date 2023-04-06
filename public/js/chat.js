@@ -1,5 +1,10 @@
 const socket = io();
 
+// Audio
+const newMessageAudio = new Audio("/audio/message.wav");
+const newUserAudio = new Audio("/audio/joined.wav");
+const leaveAudio = new Audio("/audio/leave.wav");
+
 // Elements
 const $chatEl = document.querySelector("#chat");
 const $inputEl = document.querySelector("#message-input");
@@ -12,11 +17,19 @@ const messageTemplate = document.querySelector("#message-template").innerHTML;
 const locationTemplate = document.querySelector(
   "#location-message-template"
 ).innerHTML;
+const sidebarTemplate = document.querySelector("#sidebar-template").innerHTML;
 
-// Options
-const { username, room } = Qs.parse(location.search, {
-  ignoreQueryPrefix: true,
-});
+const getUserData = () => {
+  const userData = Qs.parse(location.search, {
+    ignoreQueryPrefix: true,
+  });
+
+  if (userData.username) {
+    userData.username = userData.username.toLowerCase().trim();
+  }
+
+  return userData;
+};
 
 document.querySelector("#message-form").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -63,6 +76,19 @@ function displayMessage(message, template) {
   });
 
   $messages.insertAdjacentHTML("beforeend", html);
+
+  const { username: currentUserName } = getUserData();
+  if (username !== currentUserName && username !== "Admin") {
+    newMessageAudio.play();
+  }
+
+  if (username === "Admin" && text.includes("has joined")) {
+    newUserAudio.play();
+  }
+
+  if (username === "Admin" && text.includes("has left")) {
+    leaveAudio.play();
+  }
 }
 
 socket.on("locationMessage", (message) => {
@@ -73,9 +99,19 @@ socket.on("message", (message) => {
   displayMessage(message, messageTemplate);
 });
 
+// Options
+const { username, room } = getUserData();
 socket.emit("join", { username, room }, (error) => {
   if (error) {
     alert(error);
     location.href = "/";
   }
+});
+
+socket.on("roomData", ({ room, users }) => {
+  const html = Mustache.render(sidebarTemplate, {
+    room,
+    users,
+  });
+  document.querySelector("#sidebar").innerHTML = html;
 });

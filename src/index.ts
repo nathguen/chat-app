@@ -25,17 +25,25 @@ io.on('connection', (socket) => {
     const { error, user } = addUser({ id: socket.id, ...data });
 
     if (error) {
-      return callback(error);
+      return callback && callback(error);
     }
 
     if (!user) {
-      return callback('User not found');
+      return callback && callback('User not found');
     }
 
     socket.join(user.room);
 
     socket.emit('message', generateMessage('Admin', 'Welcome!'));
     socket.broadcast.to(user.room).emit('message', generateMessage('Admin', `${user.username} has joined!`));
+    io.to(user.room).emit('roomData', {
+      room: user.room,
+      users: getUsersInRoom(user.room)
+    });
+
+    if (callback) {
+      return callback && callback();
+    }
   })
 
   socket.on('sendMessage', (message, callback) => {
