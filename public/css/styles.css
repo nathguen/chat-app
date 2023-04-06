@@ -94,6 +94,7 @@ button:disabled {
     color: white;
     background: #333744;
     width: 225px;
+    min-width: 225px;
     overflow-y: scroll
 }
 
@@ -115,7 +116,7 @@ button:disabled {
 /* Message Styles */
 
 .message {
-    margin-bottom: 16px;   
+    margin-bottom: 16px;  
 }
 
 .message__name {
